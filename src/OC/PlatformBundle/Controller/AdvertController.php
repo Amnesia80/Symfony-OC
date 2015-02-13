@@ -44,14 +44,9 @@ public function indexAction($page)
   }
   public function viewAction($id)
   {
-    $advert = array(
-      'title'   => 'Recherche développpeur Symfony2',
-      'id'      => $id,
-      'author'  => 'Alexandre',
-      'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
-      'date'    => new \Datetime()
-    );
-
+    $advert = new Advert;
+    $advert->setContent("Recherche développeur Symfony2.");
+  
     return $this->render('OCPlatformBundle:Advert:view.html.twig', array(
       'advert' => $advert
     ));
@@ -59,20 +54,17 @@ public function indexAction($page)
 
   public function addAction(Request $request)
   {
-    // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
+    // On récupère le service
+    $antispam = $this->container->get('oc_platform.antispam');
 
-    // Si la requête est en POST, c'est que le visiteur a soumis le formulaire
-    if ($request->isMethod('POST')) {
-      // Ici, on s'occupera de la création et de la gestion du formulaire
-
-      $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
-
-      // Puis on redirige vers la page de visualisation de cettte annonce
-      return $this->redirect($this->generateUrl('oc_platform_view', array('id' => 5)));
+    // Je pars du principe que $text contient le texte d'un message quelconque
+    $text = '...';
+    if ($antispam->isSpam($text)) {
+      throw new \Exception('Votre message a été détecté comme spam !');
     }
-
-    // Si on n'est pas en POST, alors on affiche le formulaire
-    return $this->render('OCPlatformBundle:Advert:add.html.twig');
+    
+    // Ici le message n'est pas un spam
+  
   }
 
   public function editAction($id, Request $request)
